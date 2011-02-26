@@ -1,0 +1,10 @@
+.map
+*.aps
+*.aws
+*.lst
+*.swp
+blinky.hex
+test_badge.hex
+default/
+test_badge
+blinky
