@@ -18,6 +18,7 @@
 // 4 = PB3
 #define irInPortBPin  4
 
+#define ALL_RGB_OFF      PORTB |= rgbMask;
 #define JUST_RED_ON      PORTB |= rgbMask; PORTB &= ~(redMask);
 #define JUST_GREEN_ON    PORTB |= rgbMask; PORTB &= ~(grnMask);
 #define JUST_BLUE_ON     PORTB |= rgbMask; PORTB &= ~(bluMask);
@@ -25,6 +26,4 @@
 #define FLASH_BLUE      PORTB ^= bluMask; delay_ten_us(100); PORTB ^= bluMask;
 #define FLASH_GREEN     PORTB ^= grnMask; delay_ten_us(100); PORTB ^= grnMask;
 #define FLASH_RED       PORTB ^= redMask; delay_ten_us(100); PORTB ^= redMask;
-
-
 
