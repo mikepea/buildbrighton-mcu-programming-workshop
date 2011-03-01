@@ -6,9 +6,9 @@
  */
 
 #include <avr/io.h>
-#include <badge.h>
+#include "badge.h"
 
-unsigned long loop_counter = 0
+unsigned long loop_counter = 0;
 
 void delay_ten_us(unsigned int us) {
   unsigned int count;
@@ -22,7 +22,7 @@ void delay_ten_us(unsigned int us) {
 }
 
 void pre_loop_setup() {
-
+    delay_ten_us(100);
 }
 
 int main(void) {
