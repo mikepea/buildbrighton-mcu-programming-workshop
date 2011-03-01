@@ -43,11 +43,11 @@ int main(void) {
 
     while (1) {
 
-        FLASH_RED;
+        JUST_RED_ON;
         delay_ten_us(10000);
-        FLASH_GREEN;
+        JUST_GREEN_ON;
         delay_ten_us(10000);
-        FLASH_BLUE;
+        JUST_BLUE_ON;
         delay_ten_us(10000);
 
     }
