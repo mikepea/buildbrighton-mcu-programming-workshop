@@ -1,10 +1,15 @@
 /*
  * blinky.c
  *
+ * Turn LED on, and off - using sleep delays
+ * 
  */
 
-
 #include <avr/io.h>
+#include "badge.h"
+
+unsigned int loop_counter = 0;
+unsigned int second_counter = 0;
 
 void delay_ten_us(unsigned int us) {
   unsigned int count;
@@ -17,8 +22,7 @@ void delay_ten_us(unsigned int us) {
   }
 }
 
-int main(void) {
-
+void pre_loop_setup() {
     // zero our timer controls, for now
     TCCR0A = 0;
     TCCR0B = 0;
@@ -30,14 +34,24 @@ int main(void) {
     // all PORTB output pins High (all LEDs off), except for the
     // IR LED, which is SOURCE not SINK
     PORTB = ( 0xFF & ~irOutMask );
-                    // -- (if we set an input pin High it activates a
-                    // pull-up resistor, which we don't need, but don't care about either)
+
+}
+
+int main(void) {
 
     pre_loop_setup();
 
     while (1) {
 
-        main_loop_counter++;
+        JUST_RED_ON;
+
+        delay_ten_us(10000);
+
+        ALL_RGB_OFF;
+        
+        delay_ten_us(10000);
+
+        loop_counter++;
 
     }
 
