@@ -4,14 +4,14 @@ MCU = attiny45
 
 F_CPU = 8000000   	# 8 MHz
 
-AVRDUDE_PROGRAMMER = usbtiny
-#AVRDUDE_PROGRAMMER = stk500v2
+#AVRDUDE_PROGRAMMER = usbtiny
+AVRDUDE_PROGRAMMER = stk500v2
 
 #AVRDUDE_PORT =  /dev/cu.usbmodemfa221	# programmer connected to USB
-#AVRDUDE_PORT =  /dev/cu.usbmodemfd121	# programmer connected to USB
+AVRDUDE_PORT =  /dev/cu.usbmodemfd121	# programmer connected to USB
 #AVRDUDE_PORT =  /dev/cu.usbmodem1a21	# programmer connected to USB
 #AVRDUDE_PORT =  /dev/cu.usbmodem1d11	# programmer connected to USB
-AVRDUDE_PORT =  usb	# usbtiny
+#AVRDUDE_PORT =  usb	# usbtiny
 
 # Default target.
 
@@ -22,7 +22,7 @@ all: 	begin gccversion \
 # Program the device
 program-badge: badge.hex
 program-test_badge: test_badge.hex
-program-blinky: blinky.hex
+program-my_code: my_code.hex
 
 # this is necessary if you're burning the AVR for the first time...
 # sets the proper fuse for 8MHz internal oscillator with no clk div

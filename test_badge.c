@@ -8,7 +8,8 @@
 #include <avr/io.h>
 #include "badge.h"
 
-unsigned long loop_counter = 0;
+unsigned int loop_counter = 0;
+unsigned int second_counter = 0;
 
 void delay_ten_us(unsigned int us) {
   unsigned int count;
@@ -45,11 +46,16 @@ int main(void) {
 
     while (1) {
 
-        if ( loop_counter % 3000000 == 0 ) { 
+        if ( loop_counter > 1000 ) {
+            second_counter++;
+            loop_counter = 0;
+        }
+
+        if ( second_counter % 6 == 0 ) { 
             JUST_RED_ON;
-        } else if ( loop_counter % 2000000 == 0 ) { 
+        } else if ( second_counter % 6 == 2 ) { 
             JUST_GREEN_ON;
-        } else if ( loop_counter % 1000000 == 0 ) { 
+        } else if ( second_counter % 6 == 4 ) { 
             JUST_BLUE_ON;
         } else {
             ALL_RGB_OFF;
