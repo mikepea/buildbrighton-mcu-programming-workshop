@@ -1,196 +1,325 @@
-MCU = attiny45
-#MCU = attiny25
-#MCU = attiny85
+#########  AVR Project Makefile Template   #########
+#####                                        ######
+######    Copyright (C) 2003-2005,Pat Deegan, ######
+######            Psychogenic Inc             ######
+######          All Rights Reserved           ######
+######                                        ######
+###### You are free to use this code as part  ######
+###### of your own applications provided      ######
+###### you keep this copyright notice intact  ######
+###### and acknowledge its authorship with    ######
+###### the words:                             ######
+######                                        ######
+###### "Contains software by Pat Deegan of    ######
+###### Psychogenic Inc (www.psychogenic.com)" ######
+######                                        ######
+###### If you use it as part of a web site    ######
+###### please include a link to our site,     ######
+###### http://electrons.psychogenic.com  or   ######
+###### http://www.psychogenic.com             ######
+######                                        ######
+####################################################
 
-F_CPU = 8000000   	# 8 MHz
 
-#AVRDUDE_PROGRAMMER = usbtiny
-AVRDUDE_PROGRAMMER = stk500v2
+##### This Makefile will make compiling Atmel AVR 
+##### micro controller projects simple with Linux 
+##### or other Unix workstations and the AVR-GCC 
+##### tools.
+#####
+##### It supports C, C++ and Assembly source files.
+#####
+##### Customize the values as indicated below and :
+##### make
+##### make disasm 
+##### make stats 
+##### make hex
+##### make writeflash
+##### make gdbinit
+##### or make clean
+#####
+##### See the http://electrons.psychogenic.com/ 
+##### website for detailed instructions
 
-#AVRDUDE_PORT =  /dev/cu.usbmodemfa221	# programmer connected to USB
-AVRDUDE_PORT =  /dev/cu.usbmodemfd121	# programmer connected to USB
-#AVRDUDE_PORT =  /dev/cu.usbmodem1a21	# programmer connected to USB
-#AVRDUDE_PORT =  /dev/cu.usbmodem1d11	# programmer connected to USB
-#AVRDUDE_PORT =  usb	# usbtiny
 
-# Default target.
+####################################################
+#####                                          #####
+#####              Configuration               #####
+#####                                          #####
+##### Customize the values in this section for #####
+##### your project. MCU, PROJECTNAME and       #####
+##### PRJSRC must be setup for all projects,   #####
+##### the remaining variables are only         #####
+##### relevant to those needing additional     #####
+##### include dirs or libraries and those      #####
+##### who wish to use the avrdude programmer   #####
+#####                                          #####
+##### See http://electrons.psychogenic.com/    #####
+##### for further details.                     #####
+#####                                          #####
+####################################################
 
-all: 	begin gccversion \
-	badge.hex \
-	finished end
 
-# Program the device
-program-badge: badge.hex
-program-test_badge: test_badge.hex
-program-my_code: my_code.hex
+#####         Target Specific Details          #####
+#####     Customize these for your project     #####
 
-# this is necessary if you're burning the AVR for the first time...
-# sets the proper fuse for 8MHz internal oscillator with no clk div
-burn-fuse:
-	$(AVRDUDE) $(AVRDUDE_FLAGS) -B 250 -u -U lfuse:w:0xe2:m -U hfuse:w:0xdf:m
+# Name of target controller 
+# (e.g. 'at90s8515', see the available avr-gcc mmcu 
+# options for possible values)
+MCU=attiny45
 
-eeprom-read:
-	$(AVRDUDE) $(AVRDUDE_FLAGS) -B 5 -U eeprom:r:eeprom_sets/eeprom_read.hex:i
+# id to use with programmer
+# default: PROGRAMMER_MCU=$(MCU)
+# In case the programer used, e.g avrdude, doesn't
+# accept the same MCU name as avr-gcc (for example
+# for ATmega8s, avr-gcc expects 'atmega8' and 
+# avrdude requires 'm8')
+PROGRAMMER_MCU=t45
 
-eeprom-write:
-	$(AVRDUDE) $(AVRDUDE_FLAGS) -B 5 -U eeprom:w:eeprom_sets/eeprom_write.hex:i
+# Name of our project
+# (use a single word, e.g. 'myproject')
+PROJECTNAME=example
 
-program-badge-id: program-badge
-	$(AVRDUDE) $(AVRDUDE_FLAGS) -B 10 -U eeprom:w:$(MY_ID):m
+# Source files
+# List C/C++/Assembly source files:
+# (list all files to compile, e.g. 'a.c b.cpp as.S'):
+# Use .cc, .cpp or .C suffix for C++ files, use .S 
+# (NOT .s !!!) for assembly source code files.
+# PRJSRC=main.c myclass.cpp lowlevelstuff.S
+PRJSRC=example.c include/common.c include/sendNEC.c
 
-# this programs the dependant hex file using our default avrdude flags
-program-%:
-	$(AVRDUDE) $(AVRDUDE_FLAGS) -B 1 $(AVRDUDE_WRITE_FLASH)$<
+# additional includes (e.g. -I/path/to/mydir)
+# INC=-I/path/to/include
+INC=-Iinclude
 
-FORMAT = ihex 		# create a .hex file
-OPT = s			# assembly-level optimization
+# libraries to link in (e.g. -lmylib)
+LIBS=
 
-# Optional compiler flags.
-#  -g:        generate debugging information (for GDB, or for COFF conversion)
-#  -O*:       optimization level
-#  -f...:     tuning, see gcc manual and avr-libc documentation
-#  -Wall...:  warning level
-#  -Wa,...:   tell GCC to pass this to the assembler.
-#    -ahlms:  create assembler listing
+# Optimization level, 
+# use s (size opt), 1, 2, 3 or 0 (off)
+OPTLEVEL=s
 
-CFLAGS = -g -O$(OPT) \
--funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums \
--Wall -Wstrict-prototypes \
--DF_CPU=$(F_CPU) \
--Wa,-adhlns=$(<:.c=.lst) \
-$(patsubst %,-I%,$(EXTRAINCDIRS)) \
--mmcu=$(MCU)
 
-# Set a "language standard" compiler flag.
-CFLAGS += -std=gnu99
+#####      AVR Dude 'writeflash' options       #####
+#####  If you are using the avrdude program
+#####  (http://www.bsdhome.com/avrdude/) to write
+#####  to the MCU, you can set the following config
+#####  options and use 'make writeflash' to program
+#####  the device.
 
-# Optional assembler flags.
-#  -Wa,...:   tell GCC to pass this to the assembler.
-#  -ahlms:    create listing
-#  -gstabs:   have the assembler create line number information; note that
-#             for use in COFF files, additional information about filenames
-#             and function names needs to be present in the assembler source
-#             files -- see avr-libc docs [FIXME: not yet described there]
-ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs 
 
-# Optional linker flags.
-#  -Wl,...:   tell GCC to pass this to linker.
-#  -Map:      create map file
-#  --cref:    add cross reference to  map file
-LDFLAGS = -Wl,-Map=$(TARGET).map,--cref
+# programmer id--check the avrdude for complete list
+# of available opts.  These should include stk500,
+# avr910, avrisp, bsd, pony and more.  Set this to
+# one of the valid "-c PROGRAMMER-ID" values 
+# described in the avrdude info page.
+# 
+#AVRDUDE_PROGRAMMERID=avrisp2
+#AVRDUDE_PROGRAMMERID=usbtiny
+AVRDUDE_PROGRAMMERID=stk500v2
 
-# ---------------------------------------------------------------------------
-# Programming support using avrdude.
-AVRDUDE = avrdude
+# port--serial or parallel port to which your 
+# hardware programmer is attached
+#
+#AVRDUDE_PORT=/dev/ttyUSB0
+AVRDUDE_PORT=/dev/cu.usbmodemfd121
 
-# Programming support using avrdude. Settings and variables.
-AVRDUDE_WRITE_FLASH = -U flash:w:
-AVRDUDE_FLAGS = -p $(MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
 
-# ---------------------------------------------------------------------------
+####################################################
+#####                Config Done               #####
+#####                                          #####
+##### You shouldn't need to edit anything      #####
+##### below to use the makefile but may wish   #####
+##### to override a few of the flags           #####
+##### nonetheless                              #####
+#####                                          #####
+####################################################
 
-# Define directories, if needed.
-DIRAVR = c:/progra~1/winavr
-DIRAVRBIN = $(DIRAVR)/bin
-DIRAVRUTILS = $(DIRAVR)/utils/bin
-DIRINC = .
-DIRLIB = $(DIRAVR)/avr/lib
 
-# Define programs and commands.
-SHELL = sh
-CC = avr-gcc
-OBJCOPY = avr-objcopy
-OBJDUMP = avr-objdump
-SIZE = avr-size
-REMOVE = rm -f
-COPY = cp
+##### Flags ####
 
-# Define Messages
-# English
-MSG_ERRORS_NONE = Errors: none
-MSG_BEGIN = -------- begin --------
-MSG_END = --------  end  --------
-MSG_SIZE_BEFORE = Size before: 
-MSG_SIZE_AFTER = Size after:
-MSG_FLASH = Creating load file for Flash:
-MSG_EXTENDED_LISTING = Creating Extended Listing:
-MSG_SYMBOL_TABLE = Creating Symbol Table:
-MSG_LINKING = Linking:
-MSG_COMPILING = Compiling:
-MSG_ASSEMBLING = Assembling:
-MSG_CLEANING = Cleaning project:
+# HEXFORMAT -- format for .hex file output
+HEXFORMAT=ihex
+
+# compiler
+CFLAGS=-I. $(INC) -g -mmcu=$(MCU) -O$(OPTLEVEL) \
+	-std=c99 \
+	-DF_CPU=16500000	\
+	-fpack-struct -fshort-enums             \
+	-funsigned-bitfields -funsigned-char    \
+	-Wall -Wstrict-prototypes               \
+	-Wa,-ahlms=$(firstword                  \
+	$(filter %.lst, $(<:.c=.lst)))
+
+# c++ specific flags
+CPPFLAGS=-fno-exceptions               \
+	-Wa,-ahlms=$(firstword         \
+	$(filter %.lst, $(<:.cpp=.lst))\
+	$(filter %.lst, $(<:.cc=.lst)) \
+	$(filter %.lst, $(<:.C=.lst)))
+
+# assembler
+ASMFLAGS =-I. $(INC) -mmcu=$(MCU)        \
+	-x assembler-with-cpp            \
+	-DF_CPU=16500000	\
+	-Wa,-gstabs,-ahlms=$(firstword   \
+		$(<:.S=.lst) $(<.s=.lst))
+
+
+# linker
+LDFLAGS=-Wl,-Map,$(TRG).map -mmcu=$(MCU) \
+	-lm $(LIBS)
+
+##### executables ####
+CC=avr-gcc
+OBJCOPY=avr-objcopy
+OBJDUMP=avr-objdump
+SIZE=avr-size
+AVRDUDE=avrdude
+REMOVE=rm -f
+
+##### automatic target names ####
+TRG=$(PROJECTNAME).out
+DUMPTRG=$(PROJECTNAME).s
+
+HEXROMTRG=$(PROJECTNAME).hex 
+HEXTRG=$(HEXROMTRG) $(PROJECTNAME).ee.hex
+GDBINITFILE=gdbinit-$(PROJECTNAME)
 
 # Define all object files.
-OBJ = $(SRC:.c=.o) $(ASRC:.S=.o) 
 
-# Define all listing files.
-LST = $(ASRC:.S=.lst) $(SRC:.c=.lst)
+# Start by splitting source files by type
+#  C++
+CPPFILES=$(filter %.cpp, $(PRJSRC))
+CCFILES=$(filter %.cc, $(PRJSRC))
+BIGCFILES=$(filter %.C, $(PRJSRC))
+#  C
+CFILES=$(filter %.c, $(PRJSRC))
+#  Assembly
+ASMFILES=$(filter %.S, $(PRJSRC))
 
-# Combine all necessary flags and optional flags.
-# Add target processor to flags.
-ALL_CFLAGS = -I. $(CFLAGS)
-ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
 
-# Eye candy.
-# AVR Studio 3.x does not check make's exit code but relies on
-# the following magic strings to be generated by the compile job.
-begin:
+# List all object files we need to create
+OBJDEPS=$(CFILES:.c=.o)    \
+	$(CPPFILES:.cpp=.o)\
+	$(BIGCFILES:.C=.o) \
+	$(CCFILES:.cc=.o)  \
+	$(ASMFILES:.S=.o)
+
+# Define all lst files.
+LST=$(filter %.lst, $(OBJDEPS:.o=.lst))
+
+# All the possible generated assembly 
+# files (.s files)
+GENASMFILES=$(filter %.s, $(OBJDEPS:.o=.s)) 
+
+
+.SUFFIXES : .c .cc .cpp .C .o .out .s .S \
+	.hex .ee.hex .h .hh .hpp
+
+
+.PHONY: writeflash clean stats gdbinit stats
+
+# Make targets:
+# all, disasm, stats, hex, writeflash/install, clean
+all: $(HEXTRG)
+#all: $(TRG)
+
+disasm: $(DUMPTRG) stats
+
+stats: $(TRG)
+	$(OBJDUMP) -h $(TRG)
+	$(SIZE) $(TRG) 
+
+hex: $(HEXTRG)
+
+
+writeflash: hex
+	$(AVRDUDE) -c $(AVRDUDE_PROGRAMMERID) -P $(AVRDUDE_PORT)  \
+	 -p $(PROGRAMMER_MCU) -e        \
+	 -V -U flash:w:$(HEXROMTRG)
+
+install: writeflash
+
+$(DUMPTRG): $(TRG) 
+	$(OBJDUMP) -S  $< > $@
+
+
+$(TRG): $(OBJDEPS) 
+	$(CC) $(LDFLAGS) -o $(TRG) $(OBJDEPS)
+
+
+#### Generating assembly ####
+# asm from C
+%.s: %.c
+	$(CC) -S $(CFLAGS) $< -o $@
+
+# asm from (hand coded) asm
+%.s: %.S
+	$(CC) -S $(ASMFLAGS) $< > $@
+
+
+# asm from C++
+.cpp.s .cc.s .C.s :
+	$(CC) -S $(CFLAGS) $(CPPFLAGS) $< -o $@
+
+
+
+#### Generating object files ####
+# object from C
+.c.o: 
+	$(CC) $(CFLAGS) -c $< -o $@
+
+
+# object from C++ (.cc, .cpp, .C files)
+.cc.o .cpp.o .C.o :
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+
+# object from asm
+.S.o :
+	$(CC) $(ASMFLAGS) -c $< -o $@
+
+
+#### Generating hex files ####
+# hex files from elf
+#####  Generating a gdb initialisation file    #####
+.out.hex:
+	$(OBJCOPY) -j .text                    \
+		-j .data                       \
+		-O $(HEXFORMAT) $< $@
+
+.out.ee.hex:
+	$(OBJCOPY) -j .eeprom                  \
+		--change-section-lma .eeprom=0 \
+		-O $(HEXFORMAT) $< $@
+
+
+#####  Generating a gdb initialisation file    #####
+##### Use by launching simulavr and avr-gdb:   #####
+#####   avr-gdb -x gdbinit-myproject           #####
+gdbinit: $(GDBINITFILE)
+
+$(GDBINITFILE): $(TRG)
+	@echo "file $(TRG)" > $(GDBINITFILE)
+	
+	@echo "target remote localhost:1212" \
+		                >> $(GDBINITFILE)
+	
+	@echo "load"        >> $(GDBINITFILE) 
+	@echo "break main"  >> $(GDBINITFILE)
+	@echo "continue"    >> $(GDBINITFILE)
 	@echo
-	@echo $(MSG_BEGIN)
+	@echo "Use 'avr-gdb -x $(GDBINITFILE)'"
 
-finished:
-	@echo $(MSG_ERRORS_NONE)
 
-end:
-	@echo $(MSG_END)
-	@echo
+#### Cleanup ####
+clean:
+	$(REMOVE) $(TRG) $(TRG).map $(DUMPTRG)
+	$(REMOVE) $(OBJDEPS)
+	$(REMOVE) $(LST) $(GDBINITFILE)
+	$(REMOVE) $(GENASMFILES)
+	$(REMOVE) $(HEXTRG)
+	
 
-# Display compiler version information.
-gccversion : 
-	@$(CC) --version
 
-# Create final output files (.hex) from ELF output file.
-%.hex: %.elf
-	@echo
-	@echo $(MSG_FLASH) $@
-	$(OBJCOPY) -O $(FORMAT) -R .eeprom $< $@
+#####                    EOF                   #####
 
-# Link: create ELF output file from object files.
-.SECONDARY : $(TARGET).elf
-.PRECIOUS : $(OBJ)
-
-%.elf: %.o
-	@echo
-	@echo $(MSG_LINKING) $@
-	$(CC) $(ALL_CFLAGS) $< --output $@ $(LDFLAGS)
-
-# Compile: create object files from C source files.
-%.o : %.c
-	@echo
-	@echo $(MSG_COMPILING) $<
-	$(CC) -c $(ALL_CFLAGS) $< -o $@
-
-# Compile: create assembler files from C source files.
-%.s : %.c
-	$(CC) -S $(ALL_CFLAGS) $< -o $@
-
-# Assemble: create object files from assembler source files.
-%.o : %.S
-	@echo
-	@echo $(MSG_ASSEMBLING) $<
-	$(CC) -c $(ALL_ASFLAGS) $< -o $@
-
-# Target: clean project.
-clean: begin clean_list finished end
-
-clean_list :
-	@echo
-	@echo $(MSG_CLEANING)
-	$(REMOVE) *.hex
-	$(REMOVE) *.lst
-	$(REMOVE) *.obj
-	$(REMOVE) *.elf
-	$(REMOVE) *.o
-
-# Listing of phony targets.
-.PHONY : all begin finish end clean clean_list program eeprom
