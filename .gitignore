@@ -3,6 +3,7 @@
 *.aws
 *.lst
 *.swp
+*.o
 blinky.hex
 test_badge.hex
 default/
