@@ -85,7 +85,7 @@ PROJECTNAME=example
 # Use .cc, .cpp or .C suffix for C++ files, use .S 
 # (NOT .s !!!) for assembly source code files.
 # PRJSRC=main.c myclass.cpp lowlevelstuff.S
-PRJSRC=example.c include/common.c include/sendNEC.c
+PRJSRC=example.c include/common.c include/sendNEC.c include/badge.c
 
 # additional includes (e.g. -I/path/to/mydir)
 # INC=-I/path/to/include
@@ -114,15 +114,18 @@ OPTLEVEL=s
 # described in the avrdude info page.
 # 
 #AVRDUDE_PROGRAMMERID=avrisp2
-#AVRDUDE_PROGRAMMERID=usbtiny
-AVRDUDE_PROGRAMMERID=stk500v2
+AVRDUDE_PROGRAMMERID=usbtiny
+#AVRDUDE_PROGRAMMERID=stk500v2
 
 # port--serial or parallel port to which your 
 # hardware programmer is attached
 #
 #AVRDUDE_PORT=/dev/ttyUSB0
-AVRDUDE_PORT=/dev/cu.usbmodemfd121
+#AVRDUDE_PORT=/dev/cu.usbmodemfd121
+#AVRDUDE_PORT=/dev/cu.usbmodemfa221
+AVRDUDE_PORT=usb
 
+AVRDUDE_FLAGS = -p $(MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMERID)
 
 ####################################################
 #####                Config Done               #####
@@ -232,11 +235,11 @@ stats: $(TRG)
 
 hex: $(HEXTRG)
 
+burn-fuse:
+	$(AVRDUDE) $(AVRDUDE_FLAGS) -B 20 -u -U lfuse:w:0xe2:m -U hfuse:w:0xdf:m
 
 writeflash: hex
-	$(AVRDUDE) -c $(AVRDUDE_PROGRAMMERID) -P $(AVRDUDE_PORT)  \
-	 -p $(PROGRAMMER_MCU) -e        \
-	 -V -U flash:w:$(HEXROMTRG)
+	$(AVRDUDE) $(AVRDUDE_FLAGS) -B 10 -e -V -U flash:w:$(HEXROMTRG)
 
 install: writeflash
 

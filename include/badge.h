@@ -1,4 +1,5 @@
 
+
 // chip specifics
 // tiny45
 #define EEPROM_SIZE 256
@@ -19,6 +20,11 @@
 
 #define ALL_RGB_OFF      PORTB |= rgbMask;
 
+// IR LED is source, not sink
+#define TURN_IR_ON      PORTB |= irOutMask;
+#define TURN_IR_OFF     PORTB &= ~(irOutMask);
+
+// RGB LEDs are Sink
 #define JUST_RED_ON      PORTB |= rgbMask; PORTB ^= redMask;
 #define TURN_RED_ON      PORTB &= ~(redMask);
 #define TURN_RED_OFF     PORTB |= redMask;
@@ -35,3 +41,4 @@
 #define FLASH_GREEN     PORTB ^= grnMask; delay_ten_us(100); PORTB ^= grnMask;
 #define FLASH_BLUE      PORTB ^= bluMask; delay_ten_us(100); PORTB ^= bluMask;
 
+void initialise_registers(); 

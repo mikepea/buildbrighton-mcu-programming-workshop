@@ -1,13 +1,11 @@
 /*
- * blinky_without_delay.c
+ * test_badge.c
  *
- * Turn LED on, and off - without using sleep delays
- * 
+ * confirm our badge LED is working, by rotating R, G, B
+ *
  */
 
 #include <avr/io.h>
-#include "HSVtoRGB.h"
-#include "sendNEC.h"
 #include "common.h"
 #include "badge.h"
 
@@ -15,38 +13,30 @@ unsigned int loop_counter = 0;
 unsigned int second_counter = 0;
 
 void pre_loop_setup() {
-    // zero our timer controls, for now
-    TCCR0A = 0;
-    TCCR0B = 0;
-    TCCR1 = 0;
-    GTCCR = 0;
-
-    DDRB =  (rgbMask) | ( irOutMask );
-
-    // all PORTB output pins High (all LEDs off), except for the
-    // IR LED, which is SOURCE not SINK
-    PORTB = ( 0xFF & ~irOutMask );
-
-    enableIROut();
-    delay_ten_us(10);
-
+    initialise_registers();
 }
 
 int main(void) {
-
     pre_loop_setup();
 
     while (1) {
 
-        if ( loop_counter % 100 == 0 ) {
-            TURN_BLUE_ON;
-            TURN_GREEN_ON;
-        } else if ( loop_counter % 100 == 60 ) {
-            TURN_GREEN_OFF;
-        } else if ( loop_counter % 100 == 10 ) {
-            TURN_BLUE_OFF;
-        } 
+        if ( loop_counter > 1000 ) {
+            second_counter++;
+            loop_counter = 0;
+        }
 
+        if ( second_counter % 6 == 0 ) { 
+            JUST_RED_ON;
+        } else if ( second_counter % 6 == 2 ) { 
+            JUST_GREEN_ON;
+        } else if ( second_counter % 6 == 4 ) { 
+            JUST_BLUE_ON;
+        } else {
+            ALL_RGB_OFF;
+        }
+
+        delay_ten_us(100);
         loop_counter++;
 
     }
