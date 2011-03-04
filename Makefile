@@ -77,7 +77,7 @@ PROGRAMMER_MCU=t45
 
 # Name of our project
 # (use a single word, e.g. 'myproject')
-PROJECTNAME=example
+PROJECTNAME?=my_code
 
 # Source files
 # List C/C++/Assembly source files:
@@ -85,7 +85,7 @@ PROJECTNAME=example
 # Use .cc, .cpp or .C suffix for C++ files, use .S 
 # (NOT .s !!!) for assembly source code files.
 # PRJSRC=main.c myclass.cpp lowlevelstuff.S
-PRJSRC=example.c include/common.c include/sendNEC.c include/badge.c
+PRJSRC=$(PROJECTNAME).c include/common.c include/sendNEC.c include/badge.c
 
 # additional includes (e.g. -I/path/to/mydir)
 # INC=-I/path/to/include

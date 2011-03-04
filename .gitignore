@@ -3,9 +3,13 @@
 *.aws
 *.lst
 *.swp
+*.hex
 *.o
-blinky.hex
-test_badge.hex
+*.out
+*.map
+\.*
+*.graffle
+.DS_Store
 default/
 test_badge
 blinky
