@@ -27,8 +27,6 @@ int main(void) {
         
         delay_ten_us(10000);
 
-        loop_counter++;
-
     }
 
     return 0;
