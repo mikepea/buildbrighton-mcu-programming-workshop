@@ -18,3 +18,27 @@ void initialise_registers() {
                     // pull-up resistor, which we don't need, but don't care about either)
 
 }
+
+
+void display_colour(uint8_t tick, int r, int g, int b) {
+
+    if ((r > tick) && ( tick % 5 == 0) ) {
+        TURN_RED_ON;
+    } else {
+        TURN_RED_OFF;
+    }
+
+    if ((g > tick) && ( tick % 5 == 0)) {
+        TURN_GREEN_ON;
+    } else {
+        TURN_GREEN_OFF;
+    }
+
+    if ((b > tick) && ( tick % 2 == 0)) {
+        TURN_BLUE_ON;
+    } else {
+        TURN_BLUE_OFF;
+    }
+
+}
+

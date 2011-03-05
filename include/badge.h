@@ -42,3 +42,4 @@
 
 
 void initialise_registers(); 
+void display_colour(uint8_t tick, int r, int g, int b);
