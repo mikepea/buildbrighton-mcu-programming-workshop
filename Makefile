@@ -85,7 +85,7 @@ PROJECTNAME?=my_code
 # Use .cc, .cpp or .C suffix for C++ files, use .S 
 # (NOT .s !!!) for assembly source code files.
 # PRJSRC=main.c myclass.cpp lowlevelstuff.S
-PRJSRC=$(PROJECTNAME).c include/common.c include/sendNEC.c include/badge.c
+PRJSRC=$(PROJECTNAME).c include/common.c include/sendNEC.c include/recvNEC.c include/badge.c
 
 # additional includes (e.g. -I/path/to/mydir)
 # INC=-I/path/to/include
